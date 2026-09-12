@@ -60,7 +60,7 @@ function applyHeaderColor() {
   document.documentElement.style.setProperty('--header-bg', value);
 }
 
-function renderHeader({ showBack = false, backHref = null } = {}) {
+function renderHeader({ showBack = false, backHref = null, showCart = true } = {}) {
   const settings = Store.get().settings;
   const header = document.getElementById('site-header');
   if (!header) return;
@@ -78,10 +78,10 @@ function renderHeader({ showBack = false, backHref = null } = {}) {
         </a>
       </div>
       <div class="header-side header-end">
-        <a href="cart.html" class="icon-btn cart-btn" aria-label="${t('cart')}">
+        ${showCart ? `<a href="cart.html" class="icon-btn cart-btn" aria-label="${t('cart')}">
           <i data-lucide="shopping-cart"></i>
           <span id="cartCount" class="cart-count">${Store.cartCount()}</span>
-        </a>
+        </a>` : ''}
       </div>
     </div>
   `;
