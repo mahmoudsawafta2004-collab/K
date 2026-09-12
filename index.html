@@ -34,7 +34,7 @@
 <script src="js/store.js"></script><script src="js/i18n.js"></script><script src="js/ui.js"></script>
 <script>
 (async()=>{await Store.ready;applyDocDir();applyPageColors('menu');applySecondaryColor();applyHeaderColor();const d=Store.get(),s=d.settings;const splash=document.getElementById('splashLogo');if(s.logo){splash.src=s.logo;splash.style.display='block'}
-document.title=tField(s.restaurantName)||'Restaurant';renderHeader();renderFooter();
+document.title=tField(s.restaurantName)||'Restaurant';renderHeader({showCart:false});renderFooter();
 const hp=s.homepage||{};
 const hero=hp.hero||{}, serve=hp.categories||{}, fav=hp.featured||{}, cta=hp.cta||{};
 document.getElementById('heroEyebrow').textContent=hero.eyebrow||'';
@@ -52,10 +52,10 @@ const multi=s.multiBranch&&d.branches.length>1;const target=multi?'branches.html
 const selectedCatIds=Array.isArray(serve.selectedIds)?serve.selectedIds:null;
 const allCats=sortByOrder(d.categories||[]);
 const cats=selectedCatIds ? selectedCatIds.map(id=>allCats.find(c=>c.id===id)).filter(Boolean) : allCats;
-document.getElementById('homeCategories').innerHTML=cats.map(c=>`<a class="home-category" href="menu.html#cat-${encodeURIComponent(c.id)}"><img src="${c.image||PLACEHOLDER_IMG}" alt=""><strong>${tField(c.name)}</strong></a>`).join('');
+document.getElementById('homeCategories').innerHTML=cats.map(c=>`<a class="home-category" href="${target}"><img src="${c.image||PLACEHOLDER_IMG}" alt=""><strong>${tField(c.name)}</strong></a>`).join('');
 const selectedProductIds=Array.isArray(fav.selectedIds)?fav.selectedIds:null;
 const availableProducts=sortByOrder((d.products||[]).filter(p=>!p.branchIds?.length||p.branchIds.includes(d.branches[0]?.id)));
 const products=selectedProductIds ? selectedProductIds.map(id=>availableProducts.find(p=>p.id===id)).filter(Boolean) : availableProducts;
-document.getElementById('featuredProducts').innerHTML=products.map(p=>`<div class="product-card"><div class="product-image-wrap"><img src="${p.image||PLACEHOLDER_IMG}" alt=""></div><div class="product-info"><h3>${tField(p.name)}</h3><p>${tField(p.description)}</p><div class="product-price"><span>${fmtMoney(productBasePrice(p))}</span></div><a class="product-add-btn" href="menu.html#cat-${encodeURIComponent(p.categoryId)}">${escapeHtml(fav.button||'Order Now')}</a></div></div>`).join('');renderIcons();hideSplash();})();
+document.getElementById('featuredProducts').innerHTML=products.map(p=>`<div class="product-card"><div class="product-image-wrap"><img src="${p.image||PLACEHOLDER_IMG}" alt=""></div><div class="product-info"><h3>${tField(p.name)}</h3><p>${tField(p.description)}</p><div class="product-price"><span>${fmtMoney(productBasePrice(p))}</span></div><a class="product-add-btn" href="${target}">${escapeHtml(fav.button||'Order Now')}</a></div></div>`).join('');renderIcons();hideSplash();})();
 </script>
 </body></html>
