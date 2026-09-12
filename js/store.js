@@ -94,7 +94,7 @@ function defaultData() {
   const categories=[{id:'cat_burgers',name:{ar:'',en:'Burgers'},image:burger,branchIds:[],order:0},{id:'cat_pizza',name:{ar:'',en:'Pizza'},image:pizza,branchIds:[],order:1},{id:'cat_drinks',name:{ar:'',en:'Drinks'},image:drinks,branchIds:[],order:2},{id:'cat_desserts',name:{ar:'',en:'Desserts'},image:dessert,branchIds:[],order:3},{id:'cat_salads',name:{ar:'',en:'Salads'},image:salad,branchIds:[],order:4}];
   const mk=(id,cid,name,description,price,image,order)=>({id,categoryId:cid,image,price,discountPercent:0,branchIds:[],order,name:{ar:'',en:name},description:{ar:'',en:description},optionGroups:[]});
   const products=[mk('prod_burger','cat_burgers','Classic Burger','Grilled beef patty, lettuce, tomato and house sauce',9.5,burger,0),mk('prod_chicken','cat_burgers','Crispy Chicken Burger','Crispy chicken, lettuce, pickles and signature sauce',10.5,burger,1),mk('prod_double','cat_burgers','Double Cheese Burger','Two beef patties with cheddar and house sauce',12.5,burger,2),mk('prod_margherita','cat_pizza','Margherita Pizza','Tomato sauce, mozzarella and fresh basil',11,pizza,3),mk('prod_pepperoni','cat_pizza','Pepperoni Pizza','Mozzarella, tomato sauce and pepperoni',13,pizza,4),mk('prod_veggie','cat_pizza','Garden Veggie Pizza','Fresh vegetables, mozzarella and tomato sauce',12.5,pizza,5),mk('prod_cola','cat_drinks','Cola','Chilled soft drink',2.5,drinks,6),mk('prod_lemonade','cat_drinks','Fresh Lemonade','Freshly squeezed lemonade',4,drinks,7),mk('prod_water','cat_drinks','Bottled Water','Cold bottled water',1.5,drinks,8),mk('prod_cheesecake','cat_desserts','Cheesecake','Creamy cheesecake with a buttery crust',6,dessert,9),mk('prod_brownie','cat_desserts','Chocolate Brownie','Warm chocolate brownie',5.5,dessert,10),mk('prod_salad','cat_salads','House Salad','Crisp greens, tomato, cucumber and house dressing',7.5,salad,11)];
-  return {schemaVersion:5,settings:{lang:'en',restaurantName:{ar:'',en:'Urban Table'},logo,restaurantEmail:'',deliveryFee:4.5,minimumOrder:15,freeDeliveryThreshold:30,taxRate:0,currency:'USD',multiBranch:true,phone:'',footerEmail:'',address:'',socialLinks:{facebook:'',instagram:'',tiktok:'',x:'',youtube:''},homepage:{hero:{eyebrow:'Fresh. Fast. Made for you.',title:'Urban Table',text:'Order your favorites online for pickup or delivery.',button:'View Menu'},categories:{eyebrow:'What we serve',title:'Made to crave',selectedIds:categories.map(c=>c.id)},featured:{eyebrow:'Customer favorites',title:'Popular picks',button:'Order Now',selectedIds:products.slice(0,4).map(p=>p.id)},cta:{eyebrow:'Hungry?',title:'Your next favorite meal is one click away.',button:'Start Your Order'}},deliveryZones:[{id:'zone_standard',name:{ar:'',en:'Standard Delivery'},price:4.5},{id:'zone_extended',name:{ar:'',en:'Extended Area'},price:7.5}],slider:{images:[slider1,slider2],intervalSeconds:4},colors:{branches:{type:'solid',color1:'#ffffff',color2:'#ffffff',angle:135},menu:{type:'solid',color1:'#ffffff',color2:'#ffffff',angle:135},checkout:{type:'solid',color1:'#ffffff',color2:'#ffffff',angle:135},secondary:{type:'gradient',color1:'#8f0000',color2:'#ff4d4d',angle:135},header:{type:'solid',color1:'#ffffff',color2:'#ffffff',angle:135}}},branches:[{id:'branch_main',name:{ar:'',en:'Main Location'},image:branch,pickupEnabled:true,deliveryEnabled:true},{id:'branch_downtown',name:{ar:'',en:'Downtown Location'},image:branch,pickupEnabled:true,deliveryEnabled:true}],categories,products};
+  return {schemaVersion:6,settings:{lang:'en',restaurantName:{ar:'',en:'Urban Table'},logo,restaurantEmail:'',minimumOrder:15,freeDeliveryThreshold:30,taxRate:0,currency:'USD',multiBranch:true,phone:'',footerEmail:'',address:'',socialLinks:{facebook:'',instagram:'',tiktok:'',x:'',youtube:''},homepage:{hero:{eyebrow:'Fresh. Fast. Made for you.',title:'Urban Table',text:'Order your favorites online for pickup or delivery.',button:'View Menu'},categories:{eyebrow:'What we serve',title:'Made to crave',selectedIds:categories.map(c=>c.id)},featured:{eyebrow:'Customer favorites',title:'Popular picks',button:'Order Now',selectedIds:products.slice(0,4).map(p=>p.id)},cta:{eyebrow:'Hungry?',title:'Your next favorite meal is one click away.',button:'Start Your Order'}},slider:{images:[slider1,slider2],intervalSeconds:4},colors:{branches:{type:'solid',color1:'#ffffff',color2:'#ffffff',angle:135},menu:{type:'solid',color1:'#ffffff',color2:'#ffffff',angle:135},checkout:{type:'solid',color1:'#ffffff',color2:'#ffffff',angle:135},secondary:{type:'gradient',color1:'#8f0000',color2:'#ff4d4d',angle:135},header:{type:'solid',color1:'#ffffff',color2:'#ffffff',angle:135}}},branches:[{id:'branch_main',name:{ar:'',en:'Main Location'},image:branch,pickupEnabled:true,deliveryEnabled:true,deliveryZones:[{id:'zone_branch_main_standard',name:{ar:'',en:'Standard Delivery'},price:4.5},{id:'zone_branch_main_extended',name:{ar:'',en:'Extended Area'},price:7.5}]},{id:'branch_downtown',name:{ar:'',en:'Downtown Location'},image:branch,pickupEnabled:true,deliveryEnabled:true,deliveryZones:[{id:'zone_branch_downtown_standard',name:{ar:'',en:'Standard Delivery'},price:4.5},{id:'zone_branch_downtown_extended',name:{ar:'',en:'Extended Area'},price:7.5}]}],categories,products};
 }
 
 function migrateData(data) {
@@ -115,7 +115,6 @@ function migrateData(data) {
     colors.secondary = { type: 'gradient', color1: '#8f0000', color2: '#ff4d4d', angle: 135 };
   }
   if (!data.settings.currency) data.settings.currency = 'USD';
-  if (typeof data.settings.deliveryFee !== 'number') data.settings.deliveryFee = 5;
   if (typeof data.settings.minimumOrder !== 'number') data.settings.minimumOrder = 15;
   if (typeof data.settings.freeDeliveryThreshold !== 'number') data.settings.freeDeliveryThreshold = 30;
   if (typeof data.settings.taxRate !== 'number') data.settings.taxRate = 0;
@@ -137,13 +136,18 @@ function migrateData(data) {
     } else if (typeof hp[section][k] !== 'string') hp[section][k] = defaults[section][k];
   }));
   data.settings.lang = 'en';
-  if (!Array.isArray(data.settings.deliveryZones)) {
-    data.settings.deliveryZones = [];
-  }
+  const legacyZones = Array.isArray(data.settings.deliveryZones) ? data.settings.deliveryZones : [];
+  delete data.settings.deliveryZones;
+  delete data.settings.deliveryFee;
   data.branches.forEach(b => {
     if (typeof b.pickupEnabled !== 'boolean' && typeof b.deliveryEnabled !== 'boolean') { b.pickupEnabled = true; b.deliveryEnabled = true; }
     else { if (typeof b.pickupEnabled !== 'boolean') b.pickupEnabled = true; if (typeof b.deliveryEnabled !== 'boolean') b.deliveryEnabled = true; }
     delete b.whatsappNumber;
+    if (b.deliveryEnabled === false) {
+      delete b.deliveryZones;
+    } else if (!Array.isArray(b.deliveryZones)) {
+      b.deliveryZones = legacyZones.map((z, i) => ({ ...z, id: `${b.id}_zone_${i + 1}` }));
+    }
   });
   data.categories.forEach((c, i) => {
     if (!Array.isArray(c.branchIds)) c.branchIds = [];

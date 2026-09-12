@@ -177,8 +177,12 @@ function openBranchForm(id) {
     const name = { ar: '', en: nameText };
     if (id) {
       branch.name = name; branch.image = newImage; branch.pickupEnabled = flags[0]; branch.deliveryEnabled = flags[1];
+      if (branch.deliveryEnabled === false) delete branch.deliveryZones;
+      else if (!Array.isArray(branch.deliveryZones)) branch.deliveryZones = [];
     } else {
-      data.branches.push({ id: uid('branch'), name, image: newImage, pickupEnabled: flags[0], deliveryEnabled: flags[1] });
+      const newBranch = { id: uid('branch'), name, image: newImage, pickupEnabled: flags[0], deliveryEnabled: flags[1] };
+      if (flags[1]) newBranch.deliveryZones = [];
+      data.branches.push(newBranch);
     }
     persist();
     toast(t('saved_successfully'));
@@ -593,43 +597,67 @@ function openProdForm(id) {
 function renderDeliveryZones() {
   const data = db();
   const el = document.getElementById('sec-delivery');
+  const deliveryBranches = (data.branches || []).filter(b => b.deliveryEnabled !== false);
+  if (!deliveryBranches.length) {
+    el.innerHTML = `<div class="admin-card"><h3>${t('delivery_zones')}</h3><p class="mini-note">No branches are currently configured for delivery. Delivery zones are only available for branches that have Delivery enabled.</p></div>`;
+    return;
+  }
+  const firstBranchId = deliveryBranches[0].id;
   el.innerHTML = `
     <div class="admin-card">
       <div class="admin-topbar"><h3>${t('delivery_zones')}</h3><button class="btn-add" id="addZoneBtn">+ ${t('add')}</button></div>
-      <p class="mini-note">${t('delivery_zones_info')}</p>
+      <p class="mini-note">Delivery zones are independent for each delivery-enabled branch. Pickup-only branches do not have delivery zones.</p>
+      <div class="form-group"><label>Branch</label>
+        <select id="zoneBranchSelect">
+          ${deliveryBranches.map(b => `<option value="${escapeHtml(b.id)}">${escapeHtml(tField(b.name))}</option>`).join('')}
+        </select>
+      </div>
       <div id="zoneList"></div>
     </div>
     <div class="admin-card hidden" id="zoneFormCard"></div>
   `;
-  document.getElementById('addZoneBtn').addEventListener('click', () => openZoneForm(null));
+  const branchSelect = document.getElementById('zoneBranchSelect');
+  branchSelect.value = firstBranchId;
+  branchSelect.addEventListener('change', renderZoneList);
+  document.getElementById('addZoneBtn').addEventListener('click', () => openZoneForm(null, branchSelect.value));
 
-  document.getElementById('zoneList').innerHTML = data.settings.deliveryZones.map(z => `
-    <div class="admin-list-item">
-      <div class="info"><strong>${tField(z.name)}</strong><div class="mini-note">${fmtMoney(z.price)}</div></div>
-      <div class="actions">
-        <button class="btn-sm btn-edit" data-edit="${z.id}">${t('edit')}</button>
-        <button class="btn-sm btn-del" data-del="${z.id}">${t('delete')}</button>
+  function renderZoneList() {
+    const branch = data.branches.find(b => b.id === branchSelect.value);
+    const zones = (branch && Array.isArray(branch.deliveryZones)) ? branch.deliveryZones : [];
+    document.getElementById('zoneList').innerHTML = zones.map(z => `
+      <div class="admin-list-item">
+        <div class="info"><strong>${tField(z.name)}</strong><div class="mini-note">${fmtMoney(z.price)}</div></div>
+        <div class="actions">
+          <button class="btn-sm btn-edit" data-edit="${z.id}">${t('edit')}</button>
+          <button class="btn-sm btn-del" data-del="${z.id}">${t('delete')}</button>
+        </div>
       </div>
-    </div>
-  `).join('') || `<p class="mini-note">-</p>`;
+    `).join('') || `<p class="mini-note">No delivery zones configured for this branch.</p>`;
 
-  document.querySelectorAll('#zoneList [data-edit]').forEach(b => b.addEventListener('click', () => openZoneForm(b.dataset.edit)));
-  document.querySelectorAll('#zoneList [data-del]').forEach(b => b.addEventListener('click', () => {
-    if (!confirm(t('confirm_delete'))) return;
-    data.settings.deliveryZones = data.settings.deliveryZones.filter(x => x.id !== b.dataset.del);
-    persist(); renderDeliveryZones();
-  }));
+    document.querySelectorAll('#zoneList [data-edit]').forEach(b => b.addEventListener('click', () => openZoneForm(b.dataset.edit, branchSelect.value)));
+    document.querySelectorAll('#zoneList [data-del]').forEach(b => b.addEventListener('click', () => {
+      if (!confirm(t('confirm_delete'))) return;
+      const target = data.branches.find(x => x.id === branchSelect.value);
+      if (target) target.deliveryZones = (target.deliveryZones || []).filter(x => x.id !== b.dataset.del);
+      persist(); renderZoneList();
+    }));
+  }
+
+  renderZoneList();
 }
 
-function openZoneForm(id) {
+function openZoneForm(id, branchId) {
   const data = db();
-  const zone = id ? data.settings.deliveryZones.find(x => x.id === id) : { id: null, name: { ar: '', en: '' }, price: 0 };
+  const branch = data.branches.find(x => x.id === branchId);
+  if (!branch || branch.deliveryEnabled === false) return;
+  if (!Array.isArray(branch.deliveryZones)) branch.deliveryZones = [];
+  const zone = id ? branch.deliveryZones.find(x => x.id === id) : { id: null, name: { ar: '', en: '' }, price: 0 };
   const card = document.getElementById('zoneFormCard');
   card.classList.remove('hidden');
   card.innerHTML = `
-    <h3>${id ? t('edit') : t('add')}</h3>
+    <h3>${id ? t('edit') : t('add')} — ${escapeHtml(tField(branch.name))}</h3>
     <div class="form-row">
-      <div class="form-group"><label>${t('name_en')}</label><input type="text" id="zoneNameEn" value="${zone.name.en || zone.name.ar || ''}"></div>
+      <div class="form-group"><label>${t('name_en')}</label><input type="text" id="zoneNameEn" value="${escapeHtml(zone.name.en || zone.name.ar || '')}"></div>
     </div>
     <div class="form-group"><label>${t('zone_price')}</label><input type="number" step="0.01" min="0" id="zonePrice" value="${zone.price || 0}"></div>
     <div style="display:flex;gap:10px;">
@@ -646,7 +674,7 @@ function openZoneForm(id) {
     if (id) {
       zone.name = name; zone.price = price;
     } else {
-      data.settings.deliveryZones.push({ id: uid('zone'), name, price });
+      branch.deliveryZones.push({ id: uid('zone'), name, price });
     }
     persist();
     toast(t('saved_successfully'));
@@ -737,13 +765,10 @@ function renderGeneral() {
       <div class="form-group"><label>${t('restaurant_name')}</label><input type="text" id="restNameEn" value="${data.settings.restaurantName.en || data.settings.restaurantName.ar || ''}" required></div>
       <div class="form-group"><label>Orders Email</label><input type="email" id="restaurantEmail" value="${data.settings.restaurantEmail || ''}" placeholder="orders@restaurant.com"></div>
       <div class="form-row">
-        <div class="form-group"><label>Default Delivery Fee</label><input type="number" min="0" step="0.01" id="deliveryFee" value="${data.settings.deliveryFee ?? 5}"></div>
         <div class="form-group"><label>Minimum Delivery Order</label><input type="number" min="0" step="0.01" id="minimumOrder" value="${data.settings.minimumOrder ?? 15}"></div>
-      </div>
-      <div class="form-row">
         <div class="form-group"><label>Free Delivery Over</label><input type="number" min="0" step="0.01" id="freeDeliveryThreshold" value="${data.settings.freeDeliveryThreshold ?? 30}"></div>
-        <div class="form-group"><label>Tax Rate (%)</label><input type="number" min="0" step="0.01" id="taxRate" value="${data.settings.taxRate ?? 0}"></div>
       </div>
+      <div class="form-group"><label>Tax Rate (%)</label><input type="number" min="0" step="0.01" id="taxRate" value="${data.settings.taxRate ?? 0}"></div>
       <div class="form-group"><label>${t('currency')}</label>
         <select id="currencySelect">
           ${CURRENCIES.map(c => `<option value="${c.code}" ${c.code === (data.settings.currency || 'ILS') ? 'selected' : ''}>${tField(c.name)} (${c.symbol})</option>`).join('')}
@@ -761,7 +786,6 @@ function renderGeneral() {
     const restaurantName = document.getElementById('restNameEn').value.trim();
     data.settings.restaurantName = { ar: restaurantName, en: restaurantName };
     data.settings.restaurantEmail = document.getElementById('restaurantEmail').value.trim();
-    data.settings.deliveryFee = Math.max(0, Number(document.getElementById('deliveryFee').value) || 0);
     data.settings.minimumOrder = Math.max(0, Number(document.getElementById('minimumOrder').value) || 0);
     data.settings.freeDeliveryThreshold = Math.max(0, Number(document.getElementById('freeDeliveryThreshold').value) || 0);
     data.settings.taxRate = Math.max(0, Number(document.getElementById('taxRate').value) || 0);

@@ -7,6 +7,7 @@
   const pickupEnabled = !(branch && branch.pickupEnabled === false);
   const deliveryEnabled = !(branch && branch.deliveryEnabled === false);
   const settings = data.settings;
+  const deliveryZones = (branch && Array.isArray(branch.deliveryZones)) ? branch.deliveryZones : [];
   const cart = Store.getCart();
 
   if (!cart.length) { location.replace('cart.html'); return; }
@@ -38,11 +39,13 @@
   if (!pickupEnabled && !deliveryEnabled) pickupTab.style.display='flex';
   if (!pickupEnabled && deliveryEnabled) notice.textContent='Delivery is currently the only available option.';
   else if (pickupEnabled && !deliveryEnabled) notice.textContent='Pickup is currently the only available option.';
-  else notice.textContent = `Free delivery on orders of ${fmtMoney(Number(settings.freeDeliveryThreshold || 0))} or more.`;
+  else notice.textContent = deliveryZones.length
+    ? `Free delivery on orders of ${fmtMoney(Number(settings.freeDeliveryThreshold || 0))} or more.`
+    : 'No delivery zones are configured for this branch.';
 
-  zoneSelect.innerHTML = (settings.deliveryZones || []).length
-    ? `<option value="">Select delivery zone</option>` + settings.deliveryZones.map(z=>`<option value="${escapeHtml(z.id)}">${escapeHtml(tField(z.name))} — ${fmtMoney(Number(z.price)||0)}</option>`).join('')
-    : '<option value="branch">Standard delivery</option>';
+  zoneSelect.innerHTML = deliveryZones.length
+    ? `<option value="">Select delivery zone</option>` + deliveryZones.map(z=>`<option value="${escapeHtml(z.id)}">${escapeHtml(tField(z.name))} — ${fmtMoney(Number(z.price)||0)}</option>`).join('')
+    : '<option value="">No delivery zones available</option>'; 
 
   pickupTab.addEventListener('click',()=>setOrderType('pickup'));
   deliveryTab.addEventListener('click',()=>setOrderType('delivery'));
@@ -55,15 +58,15 @@
     orderType=type;
     pickupTab.classList.toggle('active',type==='pickup'); deliveryTab.classList.toggle('active',type==='delivery');
     locationGroup.style.display=type==='delivery'?'block':'none'; zoneGroup.style.display=type==='delivery'&&deliveryEnabled?'block':'none';
-    document.getElementById('custLocation').required=type==='delivery'; zoneSelect.required=type==='delivery' && (settings.deliveryZones||[]).length>0;
+    document.getElementById('custLocation').required=type==='delivery'; zoneSelect.required=type==='delivery' && deliveryZones.length>0;
     document.getElementById('infoTitle').textContent=type==='pickup'?'Pickup Information':'Delivery Information'; renderSummary();
   }
   function subtotal(){return cart.reduce((s,i)=>s+Number(i.unitPrice)*Number(i.qty),0);}
-  function selectedZone(){return (settings.deliveryZones||[]).find(z=>z.id===zoneSelect.value)||null;}
+  function selectedZone(){return deliveryZones.find(z=>z.id===zoneSelect.value)||null;}
   function deliveryFee(){
     if(orderType!=='delivery'||!deliveryEnabled) return 0;
     if(subtotal()>=Number(settings.freeDeliveryThreshold||0) && Number(settings.freeDeliveryThreshold||0)>0) return 0;
-    const z=selectedZone(); return z ? Number(z.price)||0 : Number(settings.deliveryFee)||0;
+    const z=selectedZone(); return z ? Number(z.price)||0 : 0;
   }
   function tax(){return subtotal()*((Number(settings.taxRate)||0)/100);}
   function total(){return subtotal()+deliveryFee()+tax();}
@@ -89,7 +92,8 @@
     const min=Number(settings.minimumOrder)||0;
     if(!name||!phone||(orderType==='delivery'&&(!address||!deliveryEnabled))){toast('Please complete the required fields.');return;}
     if(orderType==='delivery'&&subtotal()<min){toast(`Delivery minimum order is ${fmtMoney(min)}.`);return;}
-    if(orderType==='delivery'&&(settings.deliveryZones||[]).length&&!zoneSelect.value){toast('Please select a delivery zone.');return;}
+    if(orderType==='delivery'&&!deliveryZones.length){toast('No delivery zones are configured for this branch.');return;}
+    if(orderType==='delivery'&&deliveryZones.length&&!zoneSelect.value){toast('Please select a delivery zone.');return;}
     const fee=deliveryFee(), tx=tax(), grand=total(), zone=selectedZone();
     const lines=[`RESTAURANT ORDER`,`${tField(settings.restaurantName)}${branch?` — ${tField(branch.name)}`:''}`,``,`Order Type: ${orderType==='pickup'?'Pickup':'Delivery'}`,`Customer: ${name}`,`Phone: ${phone}`];
     if(orderType==='delivery'){lines.push(`Address: ${address}`);if(zone)lines.push(`Delivery Zone: ${tField(zone.name)}`)}
