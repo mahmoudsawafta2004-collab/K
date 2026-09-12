@@ -11,7 +11,7 @@
 <div class="app-splash" id="appSplash"><img id="splashLogo" alt="" style="display:none"></div>
 <header id="site-header"></header>
 <main>
-  <section class="home-hero" id="homeHero">
+  <section class="home-hero" id="homeHero" style="--hero-image:none;">
     <div class="home-hero-overlay"></div>
     <div class="home-hero-content">
       <span class="home-eyebrow" id="heroEyebrow"></span>
@@ -39,7 +39,7 @@ const hp=s.homepage||{};
 const hero=hp.hero||{}, serve=hp.categories||{}, fav=hp.featured||{}, cta=hp.cta||{};
 document.getElementById('heroEyebrow').textContent=hero.eyebrow||'';
 document.getElementById('heroTitle').textContent=hero.title||tField(s.restaurantName)||'Welcome';
-document.getElementById('heroText').textContent=hero.text||'';
+document.getElementById('heroText').textContent=hero.text||'';document.getElementById('homeHero').style.setProperty('--hero-image',hero.image ? `url(\"${hero.image}\")` : 'none');
 document.querySelector('.home-view-menu').textContent=hero.button||'View Menu';
 document.getElementById('serveEyebrow').textContent=serve.eyebrow||'';
 document.getElementById('serveTitle').textContent=serve.title||'';
