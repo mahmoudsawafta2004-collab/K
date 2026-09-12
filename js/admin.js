@@ -259,6 +259,11 @@ function renderHomepage() {
       <div class="form-group"><label>Title</label><input type="text" id="homeHeroTitle" value="${escapeHtml(hero.title || '')}" placeholder="Restaurant Name"></div>
       <div class="form-group"><label>Description</label><input type="text" id="homeHeroText" value="${escapeHtml(hero.text || '')}" placeholder="Order your favorites online for pickup or delivery."></div>
       <div class="form-group"><label>Menu Button</label><input type="text" id="homeHeroButton" value="${escapeHtml(hero.button || '')}" placeholder="View Menu"></div>
+      <div class="form-group"><label>Hero Background Image</label>
+        <img src="${hero.image || PLACEHOLDER_IMG}" class="image-preview" id="homeHeroImgPreview" style="max-height:220px;object-fit:cover;width:100%;border-radius:14px;">
+        <input type="file" id="homeHeroImgInput" accept="image/*">
+        <p class="mini-note">This image appears behind the hero text on the homepage.</p>
+      </div>
       <h4>Categories Section</h4>
       <div class="form-group"><label>Eyebrow</label><input type="text" id="homeCatEyebrow" value="${escapeHtml(categories.eyebrow || '')}" placeholder="What we serve"></div>
       <div class="form-group"><label>Title</label><input type="text" id="homeCatTitle" value="${escapeHtml(categories.title || '')}" placeholder="Made to crave"></div>
@@ -281,13 +286,21 @@ function renderHomepage() {
       <button class="btn-primary" id="saveHomepageBtn" style="width:auto;padding:10px 24px;">${t('save')}</button>
     </div>
   `;
+  let heroImage = hero.image || '';
+  document.getElementById('homeHeroImgInput').addEventListener('change', async (e) => {
+    if (e.target.files[0]) {
+      heroImage = await fileToDataURL(e.target.files[0]);
+      document.getElementById('homeHeroImgPreview').src = heroImage;
+    }
+  });
   document.getElementById('saveHomepageBtn').addEventListener('click', () => {
     data.settings.homepage = {
       hero: {
         eyebrow: document.getElementById('homeHeroEyebrow').value.trim(),
         title: document.getElementById('homeHeroTitle').value.trim(),
         text: document.getElementById('homeHeroText').value.trim(),
-        button: document.getElementById('homeHeroButton').value.trim()
+        button: document.getElementById('homeHeroButton').value.trim(),
+        image: heroImage
       },
       categories: {
         eyebrow: document.getElementById('homeCatEyebrow').value.trim(),
