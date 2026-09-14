@@ -135,7 +135,7 @@ function renderFooter() {
       ${contact.length ? `<div class="footer-contact"><div class="footer-contact-divider"></div>${contact.join('')}</div>` : ''}
       ${socialHtml ? `<div class="footer-socials">${socialHtml}</div>` : ''}
       <button id="footerAdminBtn" class="footer-admin-btn"><span class="footer-name">${escapeHtml(name)}</span></button>
-      <div class="footer-copyright">جميع الحقوق محفوظة لدى - <span class="footer-copyright-name">${escapeHtml(name)}</span></div>
+      <div class="footer-copyright">© ${new Date().getFullYear()} ${escapeHtml(name)}. All rights reserved.</div>
     </div>
   `;
   document.getElementById('footerAdminBtn').addEventListener('click', () => { location.href = 'admin/login.html'; });
