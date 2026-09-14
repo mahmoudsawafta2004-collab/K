@@ -112,7 +112,8 @@ function renderFooter() {
     <div class="footer-inner">
       ${contact.length ? `<div class="footer-contact">${contact.join('')}</div>` : ''}
       ${socialHtml ? `<div class="footer-socials">${socialHtml}</div>` : ''}
-      <button id="footerAdminBtn" class="footer-admin-btn" aria-label="Admin Login"><span class="footer-name">${escapeHtml(name)}</span></button>
+      <button id="footerAdminBtn" class="footer-admin-btn"><span class="footer-name">${escapeHtml(name)}</span></button>
+      <div class="footer-copyright">جميع الحقوق محفوظة لدى - ${escapeHtml(name)}</div>
     </div>
   `;
   document.getElementById('footerAdminBtn').addEventListener('click', () => { location.href = 'admin/login.html'; });
