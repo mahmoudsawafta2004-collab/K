@@ -724,6 +724,7 @@ function renderColors() {
   const el = document.getElementById('sec-colors');
   el.innerHTML =
     renderColorBlock('header', 'header_color') +
+    renderColorBlock('home', 'Homepage Background Color') +
     renderColorBlock('branches', 'branches_page_colors') +
     renderColorBlock('menu', 'menu_page_colors') +
     renderColorBlock('checkout', 'checkout_page_colors') +
@@ -762,6 +763,7 @@ function renderColors() {
       persist();
       toast(t('saved_successfully'));
       if (pageKey === 'secondary') applySecondaryColor();
+      if (pageKey === 'header') applyHeaderColor();
     });
   });
 }

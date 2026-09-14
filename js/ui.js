@@ -31,7 +31,8 @@ function fmtMoney(n) {
 }
 
 function applyPageColors(pageKey) {
-  const colors = Store.get().settings.colors[pageKey];
+  const allColors = Store.get().settings.colors || {};
+  const colors = allColors[pageKey] || allColors.menu;
   if (!colors) return;
   const el = document.body;
   if (colors.type === 'gradient') {
