@@ -32,18 +32,6 @@
       "intervalSeconds": 2.5
     },
     "colors": {
-      "header": {
-        "type": "solid",
-        "color1": "#ffffff",
-        "color2": "#ffffff",
-        "angle": 135
-      },
-      "home": {
-        "type": "solid",
-        "color1": "#ffffff",
-        "color2": "#ffffff",
-        "angle": 135
-      },
       "branches": {
         "type": "solid",
         "color1": "#ffffff",
@@ -66,6 +54,18 @@
         "type": "gradient",
         "color1": "#8f0000",
         "color2": "#ff4d4d",
+        "angle": 135
+      },
+      "header": {
+        "type": "solid",
+        "color1": "#ffffff",
+        "color2": "#ffffff",
+        "angle": 135
+      },
+      "homepage": {
+        "type": "solid",
+        "color1": "#ffffff",
+        "color2": "#ffffff",
         "angle": 135
       }
     },
