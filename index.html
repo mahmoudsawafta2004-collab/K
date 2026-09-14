@@ -33,7 +33,7 @@
 <footer id="site-footer"></footer>
 <script src="js/store.js"></script><script src="js/i18n.js"></script><script src="js/ui.js"></script>
 <script>
-(async()=>{await Store.ready;applyDocDir();applyPageColors('menu');applySecondaryColor();applyHeaderColor();const d=Store.get(),s=d.settings;const splash=document.getElementById('splashLogo');if(s.logo){splash.src=s.logo;splash.style.display='block'}
+(async()=>{await Store.ready;applyDocDir();applyPageColors('home');applySecondaryColor();applyHeaderColor();const d=Store.get(),s=d.settings;const splash=document.getElementById('splashLogo');if(s.logo){splash.src=s.logo;splash.style.display='block'}
 document.title=tField(s.restaurantName)||'Restaurant';renderHeader({showCart:false});renderFooter();
 const hp=s.homepage||{};
 const hero=hp.hero||{}, serve=hp.categories||{}, fav=hp.featured||{}, cta=hp.cta||{};
