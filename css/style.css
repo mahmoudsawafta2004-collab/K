@@ -96,13 +96,13 @@ body:has(#site-header) { padding-top: var(--header-h); }
 /* ===================== Footer ===================== */
 #site-footer { margin-top: auto; padding: 48px 16px 20px; text-align: left; font-family: "Tajawal", Arial, sans-serif; }
 .footer-inner { width: 100%; max-width: none; margin: 0; }
-.footer-contact { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+.footer-contact { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
 .footer-contact-divider { width: 100%; border-top: 1px solid rgba(30, 41, 59, 0.16); margin: 0 0 14px; }
 .footer-contact-item {
   display: flex; align-items: center; justify-content: flex-end; gap: 14px;
   width: 100%; color: #1f2937; text-decoration: none;
-  font-size: 0.84rem; line-height: 1.35; font-weight: 600;
-  font-family: "Inter", Arial, sans-serif; text-align: right;
+  font-size: 0.756rem; line-height: 1.35; font-weight: 650;
+  font-family: "Inter", Arial, sans-serif; text-align: left;
 }
 .footer-contact-item svg, .footer-contact-item i { width: 20px; height: 20px; flex: 0 0 20px; }
 .footer-contact-item span { min-width: 0; overflow-wrap: anywhere; }
